@@ -1,5 +1,7 @@
 # MARK XII — Iron Man Portfolio
 
+**Live:** https://hariperla.github.io/ironman-portfolio/
+
 Personal portfolio for **Hari Charan Perla**, themed as Iron Man gold-titanium armor: JARVIS-style
 boot sequence, WebGL 3D arc reactors, career told as MARK I→XII suit evolution on a rotating
 reactor dial, hologram project cards, and suit-systems skill diagnostics.
@@ -10,10 +12,16 @@ reactor dial, hologram project cards, and suit-systems skill diagnostics.
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173
+npm run dev        # http://localhost:5173/ironman-portfolio/
 npm run build      # production build → dist/
 npm run preview    # serve the production build
 ```
+
+## Deploy
+
+Pushing to `main` triggers `.github/workflows/deploy.yml`, which builds and publishes to GitHub
+Pages automatically (`base: '/ironman-portfolio/'` in `vite.config.js` matches the project-pages
+path — change both together if the repo is ever renamed or moved to a user/org page).
 
 ## Edit content
 
