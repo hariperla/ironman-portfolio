@@ -10,7 +10,7 @@ const EASE = [0.22, 1, 0.36, 1]
 const N = marks.length
 const STEP = 360 / N          // angular spacing between log nodes
 const CX = 200                // svg center
-const NODE_R = 148            // radius of the node orbit
+const NODE_R = 156            // radius of the node orbit
 const VH_PER_LOG = 90         // scroll runway per log entry
 
 /* One node on the reactor ring. Position derives from the shared ring
@@ -41,7 +41,7 @@ function DialNode({ i, mark, rotation, active, onClick }) {
       <text
         y="4"
         textAnchor="middle"
-        fontSize={mark.length > 4 ? 10.5 : 12}
+        fontSize={mark.length > 4 ? 11.5 : 13}
         fontFamily="Audiowide, sans-serif"
         fontWeight="800"
         fill={active ? 'var(--gold-bright)' : 'rgba(214,196,158,0.7)'}
@@ -62,12 +62,15 @@ function ReactorDial({ rotation, progress, activeIndex, goTo }) {
   const active = marks[activeIndex]
 
   return (
-    <div className="relative mx-auto w-[min(66vw,290px)] lg:w-[520px] flex-shrink-0">
-      {/* static ambient glow — cheap alternative to animated drop-shadow filters */}
+    <div className="relative mx-auto w-[min(70vw,300px)] lg:w-[640px] flex-shrink-0" style={{ perspective: '1200px' }}>
+      {/* static ambient glow — squashed to match the tilted ring */}
       <div
-        className="absolute -inset-6 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(185,134,15, 0.16) 30%, rgba(185,134,15, 0.05) 60%, transparent 72%)' }}
+        className="absolute inset-x-[-4%] top-1/2 -translate-y-1/2 h-[68%] rounded-[50%] pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse, rgba(185,134,15, 0.18) 30%, rgba(185,134,15, 0.05) 60%, transparent 72%)' }}
       />
+
+      {/* ring assembly — tipped back so the whole dial reads as a machine on a bench */}
+      <div style={{ transform: 'rotateX(52deg)', transformStyle: 'preserve-3d' }}>
       <svg viewBox="0 0 400 400" width="100%" height="100%" className="relative">
         {/* casing */}
         <circle cx={CX} cy={CX} r="196" fill="rgba(24,17,8, 0.88)" stroke="rgba(185,134,15, 0.25)" strokeWidth="1" />
@@ -111,45 +114,71 @@ function ReactorDial({ rotation, progress, activeIndex, goTo }) {
           <DialNode key={m.mark} i={i} mark={m.mark} rotation={rotation} active={i === activeIndex} onClick={goTo} />
         ))}
       </svg>
+      </div>
 
-      {/* 3D reactor core — three-quarter perspective, under the readout */}
+      {/* 3D reactor core — upright canvas, internally tilted to match the ring */}
       {supportsWebGL && (
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] pointer-events-none">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[64%] h-[64%] pointer-events-none">
           <Suspense fallback={null}>
-            <ArcReactor3D core="circle" extRotation={rotation} baseTilt={0.85} />
+            <ArcReactor3D core="circle" extRotation={rotation} baseTilt={-0.9} />
           </Suspense>
         </div>
       )}
 
-      {/* center readout */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+      {/* projection beam — light cone from the core up to the hologram */}
+      <motion.div
+        className="absolute pointer-events-none"
+        style={{
+          left: '30%',
+          right: '30%',
+          top: '24%',
+          bottom: '50%',
+          background: 'linear-gradient(to top, rgba(34,184,196,0.32), rgba(34,184,196,0.03))',
+          clipPath: 'polygon(40% 100%, 60% 100%, 88% 0%, 12% 0%)',
+        }}
+        animate={reduce ? {} : { opacity: [0.55, 0.95, 0.55] }}
+        transition={{ repeat: Infinity, duration: 2.6, ease: 'easeInOut' }}
+      />
+
+      {/* holographic readout — projected out above the machine */}
+      <div className="absolute inset-x-0 top-0 flex flex-col items-center pointer-events-none text-center">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeIndex}
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.1, transition: { duration: 0.18 } }}
+            initial={{ opacity: 0, y: 16, scale: 0.88 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 1.06, transition: { duration: 0.18 } }}
             transition={{ duration: 0.35, ease: EASE }}
-            className="flex flex-col items-center px-5 py-3 rounded-2xl"
-            style={{ background: 'rgba(18,12,5,0.45)', backdropFilter: 'blur(5px)' }}
           >
-            <span
-              className="text-3xl lg:text-5xl font-black"
+            <motion.div
+              animate={reduce ? {} : { y: [0, -7, 0] }}
+              transition={{ repeat: Infinity, duration: 3.6, ease: 'easeInOut' }}
+              className="flex flex-col items-center px-6 py-3 rounded-xl"
               style={{
-                fontFamily: 'var(--font-display)',
-                color: 'var(--gold-bright)',
-                letterSpacing: '0.04em',
-                textShadow: '0 0 18px rgba(232,184,75,0.5), 0 0 42px rgba(232,184,75,0.2)',
+                background: 'rgba(18,12,5,0.55)',
+                backdropFilter: 'blur(6px)',
+                border: '1px solid rgba(34,184,196,0.4)',
+                boxShadow: '0 0 26px rgba(34,184,196,0.28), 0 14px 44px rgba(20,12,4,0.22)',
               }}
             >
-              {active.mark}
-            </span>
-            <span className="mt-2 text-xs lg:text-sm tracking-[0.22em]" style={{ fontFamily: 'var(--font-mono)', color: 'var(--arc-bright)' }}>
-              {active.period}
-            </span>
-            <span className="mt-1 text-sm lg:text-lg font-bold tracking-wide" style={{ color: '#EFE1BE' }}>
-              {active.company}
-            </span>
+              <span
+                className="text-3xl lg:text-5xl font-black"
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  color: 'var(--gold-bright)',
+                  letterSpacing: '0.04em',
+                  textShadow: '0 0 18px rgba(232,184,75,0.5), 0 0 42px rgba(232,184,75,0.2)',
+                }}
+              >
+                {active.mark}
+              </span>
+              <span className="mt-2 text-xs lg:text-sm tracking-[0.22em]" style={{ fontFamily: 'var(--font-mono)', color: 'var(--arc-bright)' }}>
+                {active.period}
+              </span>
+              <span className="mt-1 text-sm lg:text-lg font-bold tracking-wide" style={{ color: '#EFE1BE' }}>
+                {active.company}
+              </span>
+            </motion.div>
           </motion.div>
         </AnimatePresence>
       </div>
@@ -293,8 +322,8 @@ export default function MarkTimeline() {
               <div className="flex flex-col items-center gap-3 lg:gap-4">
                 <ReactorDial rotation={rotation} progress={progress} activeIndex={activeIndex} goTo={goTo} />
 
-                {/* controls */}
-                <div className="flex items-center gap-3" style={{ fontFamily: 'var(--font-mono)' }}>
+                {/* controls — pulled up into the space freed by the tilted ring */}
+                <div className="flex items-center gap-3 -mt-8 lg:-mt-24" style={{ fontFamily: 'var(--font-mono)' }}>
                   <button
                     onClick={() => goTo(activeIndex - 1)}
                     disabled={activeIndex === 0}
