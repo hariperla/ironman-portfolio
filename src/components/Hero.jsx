@@ -118,7 +118,7 @@ export default function Hero() {
         style={{ y: reactorY, scale: reactorScale, opacity: reactorOpacity }}
       >
         <motion.div style={{ x: smx, y: smy }}>
-          <div className="w-[340px] h-[340px] md:w-[460px] md:h-[460px] lg:w-[520px] lg:h-[520px] opacity-45 md:opacity-100">
+          <div className="w-[340px] h-[340px] md:w-[500px] md:h-[500px] lg:w-[580px] lg:h-[580px] xl:w-[680px] xl:h-[680px] opacity-45 md:opacity-100">
             {supportsWebGL ? (
               <Suspense fallback={<ArcReactor size="100%" core="triangle" intensity={1} />}>
                 <ArcReactor3D core="triangle" tiltX={tiltX} tiltY={tiltY} />

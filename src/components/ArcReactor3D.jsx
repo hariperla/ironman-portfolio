@@ -12,6 +12,8 @@ import * as THREE from 'three'
  *               scroll spring. Read per-frame, no subscriptions.
  * tiltX/tiltY — optional MotionValues (-1..1, y-up) for pointer tilt when the
  *               canvas can't receive pointer events itself
+ * baseTilt    — static rotation.x offset (radians). ~0.85 gives a three-quarter
+ *               "workbench" perspective instead of the flat face-on view
  * reduce      — prefers-reduced-motion: render one static frame
  */
 
@@ -41,7 +43,7 @@ function TriangleCore() {
   )
 }
 
-function Reactor({ core, extRotation, tiltX, tiltY, reduce, pulseRef }) {
+function Reactor({ core, extRotation, tiltX, tiltY, baseTilt, reduce, pulseRef }) {
   const coilGroup = useRef(null)
   const innerGroup = useRef(null)
   const wholeGroup = useRef(null)
@@ -69,7 +71,7 @@ function Reactor({ core, extRotation, tiltX, tiltY, reduce, pulseRef }) {
     if (wholeGroup.current) {
       const px = tiltX ? tiltX.get() : state.pointer.x
       const py = tiltY ? tiltY.get() : state.pointer.y
-      wholeGroup.current.rotation.x = THREE.MathUtils.lerp(wholeGroup.current.rotation.x, -py * 0.32 + Math.sin(t * 0.5) * 0.05, 0.06)
+      wholeGroup.current.rotation.x = THREE.MathUtils.lerp(wholeGroup.current.rotation.x, baseTilt - py * 0.32 + Math.sin(t * 0.5) * 0.05, 0.06)
       wholeGroup.current.rotation.y = THREE.MathUtils.lerp(wholeGroup.current.rotation.y, px * 0.38 + Math.sin(t * 0.34) * 0.07, 0.06)
     }
 
@@ -82,7 +84,7 @@ function Reactor({ core, extRotation, tiltX, tiltY, reduce, pulseRef }) {
   })
 
   return (
-    <group ref={wholeGroup}>
+    <group ref={wholeGroup} rotation={[baseTilt, 0, 0]}>
       {/* back plate — solid so the reactor reads as a physical object */}
       <mesh position={[0, 0, -0.16]}>
         <circleGeometry args={[1.46, 64]} />
@@ -165,7 +167,7 @@ function Reactor({ core, extRotation, tiltX, tiltY, reduce, pulseRef }) {
   )
 }
 
-export default function ArcReactor3D({ core = 'circle', extRotation = null, tiltX = null, tiltY = null, className = '', style = {} }) {
+export default function ArcReactor3D({ core = 'circle', extRotation = null, tiltX = null, tiltY = null, baseTilt = 0, className = '', style = {} }) {
   const wrapRef = useRef(null)
   const pulseRef = useRef(null)
   const [visible, setVisible] = useState(true)
@@ -196,7 +198,7 @@ export default function ArcReactor3D({ core = 'circle', extRotation = null, tilt
         <directionalLight position={[2.5, 3, 4]} intensity={1.4} color="#F5D9A0" />
         <directionalLight position={[-3, -2, 2]} intensity={0.4} color="#22B8C4" />
         <pointLight ref={pulseRef} position={[0, 0, 1.1]} intensity={8} distance={6} color="#7DE8F5" />
-        <Reactor core={core} extRotation={extRotation} tiltX={tiltX} tiltY={tiltY} reduce={reduce} pulseRef={pulseRef} />
+        <Reactor core={core} extRotation={extRotation} tiltX={tiltX} tiltY={tiltY} baseTilt={baseTilt} reduce={reduce} pulseRef={pulseRef} />
       </Canvas>
     </div>
   )

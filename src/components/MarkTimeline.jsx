@@ -62,7 +62,7 @@ function ReactorDial({ rotation, progress, activeIndex, goTo }) {
   const active = marks[activeIndex]
 
   return (
-    <div className="relative mx-auto w-[min(62vw,260px)] lg:w-[440px] flex-shrink-0">
+    <div className="relative mx-auto w-[min(66vw,290px)] lg:w-[520px] flex-shrink-0">
       {/* static ambient glow — cheap alternative to animated drop-shadow filters */}
       <div
         className="absolute -inset-6 rounded-full pointer-events-none"
@@ -112,11 +112,11 @@ function ReactorDial({ rotation, progress, activeIndex, goTo }) {
         ))}
       </svg>
 
-      {/* 3D reactor core — paints over the casing center, under the readout */}
+      {/* 3D reactor core — three-quarter perspective, under the readout */}
       {supportsWebGL && (
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[54%] h-[54%] pointer-events-none">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] pointer-events-none">
           <Suspense fallback={null}>
-            <ArcReactor3D core="circle" extRotation={rotation} />
+            <ArcReactor3D core="circle" extRotation={rotation} baseTilt={0.85} />
           </Suspense>
         </div>
       )}
@@ -288,7 +288,7 @@ export default function MarkTimeline() {
       {/* scroll runway — the dial turns while this track passes */}
       <div ref={trackRef} style={{ height: `${N * VH_PER_LOG}vh` }} className="relative">
         <div className="sticky top-0 h-screen flex items-center overflow-hidden pt-16 lg:pt-0">
-          <div className="max-w-6xl mx-auto w-full px-6 md:px-10">
+          <div className="max-w-7xl mx-auto w-full px-6 md:px-10">
             <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-16">
               <div className="flex flex-col items-center gap-3 lg:gap-4">
                 <ReactorDial rotation={rotation} progress={progress} activeIndex={activeIndex} goTo={goTo} />
