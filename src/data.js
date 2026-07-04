@@ -112,12 +112,17 @@ export const primaryBuilds = [
   },
   {
     index: '03',
-    name: 'Weekend Drive Portal',
+    name: 'DriveQ',
     tag: 'DATA PLATFORM',
     metric: 'FLEET-SCALE ANALYTICS',
     description:
       'Fleet assignment and management portal integrated with MongoDB and Databricks — scalable analytics on utilization, coverage, and AV performance for weekend drive programs.',
-    stack: ['MongoDB', 'Databricks', 'Python', 'REST APIs'],
+    points: [
+      'Manual or auto pipeline trigger to classify triggered log data into its respective symptoms.',
+      'Manual or auto pipeline trigger to root-cause triggered data using heuristic rule-based models via an MCAP streaming service — recently augmented with VLMs reviewing camera frames and video for better scene context.',
+      'Auto-tagged events are then used to create datasets automatically every week.',
+    ],
+    stack: ['MongoDB', 'Databricks', 'Python', 'REST APIs', 'MCAP', 'VLMs'],
   },
   {
     index: '04',

@@ -396,6 +396,24 @@ function BuildReadout({ entry, index, total }) {
             {p.description}
           </p>
 
+          {p.points && (
+            <ul className="space-y-2.5 mb-6 -mt-2">
+              {p.points.map((pt, i) => (
+                <motion.li
+                  key={i}
+                  initial={{ opacity: 0, x: 14 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.35, delay: 0.15 + i * 0.08, ease: EASE }}
+                  className="flex gap-2.5 text-sm md:text-[15px] leading-relaxed"
+                  style={{ color: 'var(--text-2)' }}
+                >
+                  <span className="mt-[8px] flex-shrink-0 w-1.5 h-1.5 rotate-45" style={{ background: 'var(--red)' }} />
+                  {pt}
+                </motion.li>
+              ))}
+            </ul>
+          )}
+
           <div className="flex flex-wrap gap-2 mb-1">
             {p.stack.map((t) => (
               <Chip key={t}>{t}</Chip>
