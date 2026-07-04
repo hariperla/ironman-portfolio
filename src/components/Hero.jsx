@@ -220,7 +220,7 @@ export default function Hero() {
           <Magnetic strength={7}>
             <motion.a
               href="#missionlog"
-              whileHover={{ scale: 1.04, borderColor: 'var(--arc)' }}
+              whileHover={{ scale: 1.04, borderColor: 'var(--red)' }}
               whileTap={{ scale: 0.97 }}
               className="inline-flex items-center gap-2 px-7 py-3.5 rounded font-bold text-sm tracking-[0.18em]"
               style={{
@@ -246,7 +246,7 @@ export default function Hero() {
       >
         <span>SCROLL TO ENGAGE</span>
         <motion.svg
-          width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--arc)" strokeWidth="2" strokeLinecap="round"
+          width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red)" strokeWidth="2" strokeLinecap="round"
           animate={reduce ? {} : { y: [0, 7, 0] }}
           transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
         >

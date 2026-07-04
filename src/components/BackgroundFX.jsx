@@ -14,7 +14,7 @@ export default function BackgroundFX() {
         size: 1 + Math.random() * 2.2,
         dur: 14 + Math.random() * 22,
         delay: -Math.random() * 20,
-        color: i % 5 === 0 ? 'var(--gold)' : i % 7 === 0 ? 'var(--red)' : 'var(--arc)',
+        color: i % 3 === 0 ? 'var(--red)' : i % 5 === 0 ? 'var(--gold)' : 'var(--arc)',
         opacity: 0.15 + Math.random() * 0.35,
       })),
     [],
@@ -31,7 +31,8 @@ export default function BackgroundFX() {
         style={{
           background: `
             radial-gradient(ellipse 55% 45% at 82% 18%, rgba(185,134,15, 0.10), transparent 65%),
-            radial-gradient(ellipse 50% 40% at 12% 85%, rgba(156,32,32, 0.06), transparent 65%),
+            radial-gradient(ellipse 50% 40% at 12% 85%, rgba(156,32,32, 0.12), transparent 65%),
+            radial-gradient(ellipse 45% 38% at 88% 62%, rgba(156,32,32, 0.045), transparent 65%),
             radial-gradient(ellipse 40% 35% at 50% 50%, rgba(14,124,134, 0.045), transparent 70%)
           `,
         }}

@@ -13,7 +13,7 @@ export default function HUDOverlay() {
   })
 
   const corner = 'fixed w-8 h-8 pointer-events-none z-40 hidden md:block'
-  const stroke = { borderColor: 'rgba(14,124,134, 0.35)' }
+  const stroke = { borderColor: 'rgba(156,32,32, 0.4)' }
 
   return (
     <>

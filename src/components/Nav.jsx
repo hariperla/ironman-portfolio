@@ -29,7 +29,7 @@ export default function Nav() {
       <div className="max-w-6xl mx-auto flex items-center justify-between h-16">
         {/* monogram */}
         <a href="#top" className="flex items-center gap-3 group">
-          <span className="relative flex w-2.5 h-2.5 rounded-full ping" style={{ background: 'var(--arc)', color: 'var(--arc)' }} />
+          <span className="relative flex w-2.5 h-2.5 rounded-full ping" style={{ background: 'var(--red)', color: 'var(--red)' }} />
           <span
             className="text-sm font-black tracking-[0.3em] group-hover:text-white transition-colors"
             style={{ fontFamily: 'var(--font-display)', color: 'var(--text)' }}
@@ -50,7 +50,7 @@ export default function Nav() {
               {l.label}
               <span
                 className="absolute -bottom-1 left-0 h-px w-0 group-hover:w-full transition-all duration-300"
-                style={{ background: 'var(--arc)' }}
+                style={{ background: 'var(--red)' }}
               />
             </a>
           ))}
