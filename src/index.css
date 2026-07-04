@@ -110,7 +110,7 @@ body {
 .glow-gold { text-shadow: 0 1px 0 rgba(255,247,222,0.55), 0 2px 4px rgba(74,48,10,0.3); }
 
 /* ---- hologram sweep (activated on hover of .holo) ---- */
-.holo { position: relative; overflow: hidden; }
+.holo { position: relative; overflow-x: hidden; }
 .holo::after {
   content: '';
   position: absolute;
