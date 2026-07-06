@@ -1,19 +1,14 @@
 import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring, useReducedMotion } from 'framer-motion'
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import ArcReactor from './ArcReactor.jsx'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Magnetic } from './ui.jsx'
 import { profile } from '../data.js'
-import { supportsWebGL } from '../webgl.js'
 import { art } from '../art.js'
-
-const ArcReactor3D = lazy(() => import('./ArcReactor3D.jsx'))
 
 const EASE = [0.22, 1, 0.36, 1]
 
 // chest-reactor calibration for public/art/hero.jpg (percent of art box)
-const CHEST_X = 49.7
-const CHEST_Y = 65.8
-const REACTOR_W = 26
+const CHEST_X = 51
+const CHEST_Y = 85
 
 /* Per-letter staggered title */
 function StaggerTitle({ text, delay = 0, className, style }) {
@@ -25,8 +20,12 @@ function StaggerTitle({ text, delay = 0, className, style }) {
           aria-hidden="true"
           className="inline-block"
           initial={{ y: '110%', opacity: 0, rotateX: -50 }}
-          animate={{ y: 0, opacity: 1, rotateX: 0 }}
-          transition={{ duration: 0.65, delay: delay + i * 0.035, ease: EASE }}
+          animate={{ y: 0, opacity: [0, 1, 0.35, 1, 0.6, 1], rotateX: 0 }}
+          transition={{
+            y: { duration: 0.65, delay: delay + i * 0.035, ease: EASE },
+            rotateX: { duration: 0.65, delay: delay + i * 0.035, ease: EASE },
+            opacity: { duration: 0.5, delay: delay + i * 0.035, times: [0, 0.35, 0.5, 0.62, 0.75, 1] },
+          }}
         >
           {ch === ' ' ? ' ' : ch}
         </motion.span>
@@ -86,6 +85,41 @@ function HudChip({ label, value, dot }) {
   )
 }
 
+/* Motes drifting left along the beam, from the painted reactor toward the text —
+   sells the idea that the text is projected light, not just typography. */
+function HoloMotes({ reduce }) {
+  const motes = useMemo(
+    () => Array.from({ length: 14 }, (_, i) => ({
+      id: i,
+      topPct: 32 + Math.random() * 34,
+      size: 2 + Math.random() * 3,
+      dur: 3 + Math.random() * 2.5,
+      delay: -Math.random() * 5,
+    })),
+    [],
+  )
+  if (reduce) return null
+  return (
+    <>
+      {motes.map((m) => (
+        <motion.span
+          key={m.id}
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            top: `${m.topPct}%`,
+            width: m.size,
+            height: m.size,
+            background: 'var(--arc-bright)',
+            boxShadow: '0 0 6px var(--arc-bright), 0 0 12px var(--arc-bright)',
+          }}
+          animate={{ left: ['94%', '4%'], opacity: [0, 0.9, 0] }}
+          transition={{ repeat: Infinity, duration: m.dur, delay: m.delay, ease: 'linear' }}
+        />
+      ))}
+    </>
+  )
+}
+
 export default function Hero() {
   const ref = useRef(null)
   const reduce = useReducedMotion()
@@ -98,33 +132,33 @@ export default function Hero() {
   const reactorScale = useTransform(scrollYProgress, [0, 1], [1, 1.25])
   const reactorOpacity = useTransform(scrollYProgress, [0, 0.9], [1, 0.15])
 
-  // mouse parallax on reactor
+  // mouse parallax on the painting
   const mx = useMotionValue(0)
   const my = useMotionValue(0)
   const smx = useSpring(mx, { stiffness: 60, damping: 18 })
   const smy = useSpring(my, { stiffness: 60, damping: 18 })
-  // normalized pointer (-1..1, y-up) feeds the 3D reactor's tilt
-  const tiltX = useMotionValue(0)
-  const tiltY = useMotionValue(0)
 
   function onMouseMove(e) {
     if (reduce) return
     const { innerWidth, innerHeight } = window
     mx.set(((e.clientX / innerWidth) - 0.5) * 26)
     my.set(((e.clientY / innerHeight) - 0.5) * 26)
-    tiltX.set((e.clientX / innerWidth - 0.5) * 2)
-    tiltY.set(-(e.clientY / innerHeight - 0.5) * 2)
   }
 
   return (
     <section id="top" ref={ref} onMouseMove={onMouseMove} className="relative min-h-screen flex items-center overflow-hidden px-6 md:px-10">
-      {/* reactor — backdrop on mobile, right side on desktop */}
+      {/* painting — backdrop on mobile, right side on desktop. Height is clamped to
+          the viewport so on short screens the box never grows taller than the
+          section and gets flat-clipped by overflow-hidden. */}
       <motion.div
-        className="absolute right-[-8%] md:right-[4%] top-1/2 -translate-y-1/2 opacity-40 md:opacity-90 pointer-events-none"
+        className="absolute right-[-8%] md:right-[2%] top-1/2 -translate-y-1/2 opacity-40 md:opacity-90 pointer-events-none"
         style={{ y: reactorY, scale: reactorScale, opacity: reactorOpacity }}
       >
         <motion.div style={{ x: smx, y: smy }}>
-          <div className="relative w-[340px] md:w-[500px] lg:w-[600px] xl:w-[700px] aspect-[3/4] opacity-45 md:opacity-100">
+          <div
+            className="relative opacity-45 md:opacity-100"
+            style={{ height: 'clamp(360px, 76vh, 840px)', aspectRatio: '3 / 4', maxWidth: '88vw' }}
+          >
             {/* painted armor figure */}
             <motion.img
               src={art.hero}
@@ -136,37 +170,45 @@ export default function Hero() {
               transition={{ duration: 1.1, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
               style={{
-                maskImage: 'radial-gradient(ellipse 72% 78% at 50% 42%, black 52%, transparent 76%)',
-                WebkitMaskImage: 'radial-gradient(ellipse 72% 78% at 50% 42%, black 52%, transparent 76%)',
+                maskImage: 'radial-gradient(ellipse 70% 74% at 50% 50%, black 62%, transparent 100%)',
+                WebkitMaskImage: 'radial-gradient(ellipse 70% 74% at 50% 50%, black 62%, transparent 100%)',
               }}
             />
-            {/* chest glow fusing the live reactor into the painting */}
-            <div
+            {/* soft pulsing glow over the painted chest reactor — no foreign 3D object,
+                just breath on the light that's already in the artwork */}
+            <motion.div
               className="absolute pointer-events-none"
               style={{
-                left: `${CHEST_X}%`, top: `${CHEST_Y}%`, width: '36%', aspectRatio: '1',
+                left: `${CHEST_X}%`, top: `${CHEST_Y}%`, width: '22%', aspectRatio: '1',
                 transform: 'translate(-50%, -50%)',
-                background: 'radial-gradient(circle, rgba(94,214,255,0.38), rgba(94,214,255,0.12) 45%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(94,214,255,0.42), rgba(94,214,255,0.1) 48%, transparent 72%)',
               }}
+              animate={reduce ? {} : { opacity: [0.75, 1, 0.75], scale: [0.94, 1.04, 0.94] }}
+              transition={{ repeat: Infinity, duration: 2.6, ease: 'easeInOut' }}
             />
-            {/* live reactor embedded in the painted chest */}
-            <div
-              className="absolute"
-              style={{ left: `${CHEST_X}%`, top: `${CHEST_Y}%`, width: `${REACTOR_W}%`, aspectRatio: '1', transform: 'translate(-50%, -50%)' }}
-            >
-              {supportsWebGL ? (
-                <Suspense fallback={<ArcReactor size="100%" core="circle" intensity={1} />}>
-                  <ArcReactor3D core="circle" tiltX={tiltX} tiltY={tiltY} />
-                </Suspense>
-              ) : (
-                <ArcReactor size="100%" core="circle" intensity={1} />
-              )}
-            </div>
+            {/* projector cone — the beam that "becomes" the text block beside it */}
+            <motion.div
+              className="absolute pointer-events-none"
+              style={{
+                left: 0, top: `${CHEST_Y}%`, width: `${CHEST_X}%`, height: '40%',
+                transform: 'translateY(-50%)',
+                clipPath: 'polygon(100% 44%, 100% 56%, 0% 100%, 0% 0%)',
+                background: 'linear-gradient(to left, rgba(94,214,255,0.4), rgba(94,214,255,0.08) 65%, transparent 92%)',
+                mixBlendMode: 'screen',
+              }}
+              animate={reduce ? {} : { opacity: [0.6, 1, 0.6] }}
+              transition={{ repeat: Infinity, duration: 2.6, ease: 'easeInOut' }}
+            />
           </div>
         </motion.div>
       </motion.div>
 
-      {/* text block */}
+      {/* holographic motes drifting from the painting toward the text */}
+      <div className="absolute inset-y-0 right-0 w-[62%] md:w-[56%] pointer-events-none overflow-hidden">
+        <HoloMotes reduce={reduce} />
+      </div>
+
+      {/* text block — projected light, not just type */}
       <motion.div className="relative z-10 max-w-6xl mx-auto w-full pt-24 pb-16" style={{ y: textY, opacity: textOpacity }}>
         {/* kicker */}
         <motion.div
