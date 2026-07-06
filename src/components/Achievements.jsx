@@ -2,6 +2,7 @@ import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
 import { SectionHeader, Brackets } from './ui.jsx'
 import { achievements } from '../data.js'
+import { art } from '../art.js'
 
 const EASE = [0.22, 1, 0.36, 1]
 
@@ -74,6 +75,18 @@ export default function Achievements() {
             <p className="text-sm leading-relaxed max-w-2xl" style={{ color: 'var(--text-2)' }}>
               {featured.description}
             </p>
+          </div>
+          <div
+            className="hidden lg:block flex-shrink-0 w-52 xl:w-60 rounded-lg overflow-hidden ml-auto"
+            style={{ border: '1px solid rgba(185,134,15, 0.45)', boxShadow: '0 0 30px rgba(185,134,15, 0.18)' }}
+          >
+            <img
+              src={art.helmet}
+              alt="Gold and crimson armored helmet artwork"
+              loading="lazy"
+              className="w-full aspect-[4/5] object-cover select-none"
+              style={{ objectPosition: '68% 38%' }}
+            />
           </div>
         </motion.div>
 

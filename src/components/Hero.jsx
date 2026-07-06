@@ -4,10 +4,16 @@ import ArcReactor from './ArcReactor.jsx'
 import { Magnetic } from './ui.jsx'
 import { profile } from '../data.js'
 import { supportsWebGL } from '../webgl.js'
+import { art } from '../art.js'
 
 const ArcReactor3D = lazy(() => import('./ArcReactor3D.jsx'))
 
 const EASE = [0.22, 1, 0.36, 1]
+
+// chest-reactor calibration for public/art/hero.jpg (percent of art box)
+const CHEST_X = 49.7
+const CHEST_Y = 65.8
+const REACTOR_W = 26
 
 /* Per-letter staggered title */
 function StaggerTitle({ text, delay = 0, className, style }) {
@@ -118,14 +124,44 @@ export default function Hero() {
         style={{ y: reactorY, scale: reactorScale, opacity: reactorOpacity }}
       >
         <motion.div style={{ x: smx, y: smy }}>
-          <div className="w-[340px] h-[340px] md:w-[500px] md:h-[500px] lg:w-[580px] lg:h-[580px] xl:w-[680px] xl:h-[680px] opacity-45 md:opacity-100">
-            {supportsWebGL ? (
-              <Suspense fallback={<ArcReactor size="100%" core="triangle" intensity={1} />}>
-                <ArcReactor3D core="triangle" tiltX={tiltX} tiltY={tiltY} />
-              </Suspense>
-            ) : (
-              <ArcReactor size="100%" core="triangle" intensity={1} />
-            )}
+          <div className="relative w-[340px] md:w-[500px] lg:w-[600px] xl:w-[700px] aspect-[3/4] opacity-45 md:opacity-100">
+            {/* painted armor figure */}
+            <motion.img
+              src={art.hero}
+              alt=""
+              aria-hidden="true"
+              fetchPriority="high"
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.1, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+              style={{
+                maskImage: 'radial-gradient(ellipse 72% 78% at 50% 42%, black 52%, transparent 76%)',
+                WebkitMaskImage: 'radial-gradient(ellipse 72% 78% at 50% 42%, black 52%, transparent 76%)',
+              }}
+            />
+            {/* chest glow fusing the live reactor into the painting */}
+            <div
+              className="absolute pointer-events-none"
+              style={{
+                left: `${CHEST_X}%`, top: `${CHEST_Y}%`, width: '36%', aspectRatio: '1',
+                transform: 'translate(-50%, -50%)',
+                background: 'radial-gradient(circle, rgba(94,214,255,0.38), rgba(94,214,255,0.12) 45%, transparent 70%)',
+              }}
+            />
+            {/* live reactor embedded in the painted chest */}
+            <div
+              className="absolute"
+              style={{ left: `${CHEST_X}%`, top: `${CHEST_Y}%`, width: `${REACTOR_W}%`, aspectRatio: '1', transform: 'translate(-50%, -50%)' }}
+            >
+              {supportsWebGL ? (
+                <Suspense fallback={<ArcReactor size="100%" core="circle" intensity={1} />}>
+                  <ArcReactor3D core="circle" tiltX={tiltX} tiltY={tiltY} />
+                </Suspense>
+              ) : (
+                <ArcReactor size="100%" core="circle" intensity={1} />
+              )}
+            </div>
           </div>
         </motion.div>
       </motion.div>

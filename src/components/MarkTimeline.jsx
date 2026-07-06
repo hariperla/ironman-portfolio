@@ -3,6 +3,7 @@ import { lazy, Suspense, useRef, useState } from 'react'
 import { SectionHeader, Brackets } from './ui.jsx'
 import { marks } from '../data.js'
 import { supportsWebGL } from '../webgl.js'
+import { art } from '../art.js'
 
 const ArcReactor3D = lazy(() => import('./ArcReactor3D.jsx'))
 
@@ -196,7 +197,9 @@ function LogCard({ m, index }) {
       exit={{ opacity: 0, x: -40, transition: { duration: 0.2 } }}
       transition={{ duration: 0.45, ease: EASE }}
       className="brackets holo panel rounded-lg p-6 md:p-10 w-full lg:min-h-[min(540px,70vh)] max-h-[52vh] lg:max-h-[84vh] overflow-y-auto"
-      style={m.current ? { borderColor: 'rgba(185,134,15, 0.35)', boxShadow: '0 0 44px rgba(138,90,12, 0.08)' } : {}}
+      style={m.current
+        ? { borderColor: 'rgba(185,134,15, 0.35)', boxShadow: '0 0 44px rgba(138,90,12, 0.08)', background: 'linear-gradient(160deg, rgba(255,248,230,0.88), rgba(216,188,126,0.8))' }
+        : { background: 'linear-gradient(160deg, rgba(255,248,230,0.88), rgba(216,188,126,0.8))' }}
     >
       <Brackets />
 
@@ -316,8 +319,19 @@ export default function MarkTimeline() {
 
       {/* scroll runway — the dial turns while this track passes */}
       <div ref={trackRef} style={{ height: `${N * VH_PER_LOG}vh` }} className="relative">
-        <div className="sticky top-0 h-screen flex items-center overflow-hidden pt-16 lg:pt-0">
-          <div className="max-w-7xl mx-auto w-full px-6 md:px-10">
+        <div className="relative sticky top-0 h-screen flex items-center overflow-hidden pt-16 lg:pt-0">
+          <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+            <img
+              src={art.hangar} alt="" loading="lazy"
+              className="w-full h-full object-cover select-none"
+              style={{
+                opacity: 0.16,
+                maskImage: 'linear-gradient(180deg, transparent 0%, black 18%, black 82%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(180deg, transparent 0%, black 18%, black 82%, transparent 100%)',
+              }}
+            />
+          </div>
+          <div className="relative max-w-7xl mx-auto w-full px-6 md:px-10">
             <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-16">
               <div className="flex flex-col items-center gap-3 lg:gap-4">
                 <ReactorDial rotation={rotation} progress={progress} activeIndex={activeIndex} goTo={goTo} />

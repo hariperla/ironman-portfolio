@@ -3,6 +3,7 @@ import { useRef } from 'react'
 import { SectionHeader, Brackets, Magnetic } from './ui.jsx'
 import ArcReactor from './ArcReactor.jsx'
 import { comms, profile } from '../data.js'
+import { art } from '../art.js'
 
 const EASE = [0.22, 1, 0.36, 1]
 
@@ -16,6 +17,17 @@ export default function Contact() {
       <div
         className="absolute inset-0 pointer-events-none"
         style={{ background: 'radial-gradient(ellipse 65% 45% at 50% 100%, rgba(156,32,32, 0.07), transparent 70%)' }}
+      />
+      <img
+        src={art.gauntlet} alt="" aria-hidden="true" loading="lazy"
+        className="absolute pointer-events-none select-none hidden lg:block"
+        style={{
+          right: '-3%', bottom: '-4%', width: 'min(40vw, 560px)',
+          opacity: 0.5,
+          transform: 'rotate(-6deg)',
+          maskImage: 'radial-gradient(ellipse 62% 62% at 52% 48%, black 42%, transparent 74%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 62% 62% at 52% 48%, black 42%, transparent 74%)',
+        }}
       />
 
       <div className="max-w-6xl mx-auto relative">
