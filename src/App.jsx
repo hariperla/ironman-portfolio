@@ -11,6 +11,7 @@ import Workshop from './components/Workshop.jsx'
 import SuitSystems from './components/SuitSystems.jsx'
 import Achievements from './components/Achievements.jsx'
 import Contact from './components/Contact.jsx'
+import { useSmoothScroll, setScrollLocked } from './lib/smoothScroll.js'
 
 export default function App() {
   const reduce = useReducedMotion()
@@ -21,9 +22,13 @@ export default function App() {
     if (reduce) setBooted(true)
   }, [reduce])
 
+  // weighted inertial scroll for everyone except reduced-motion users
+  useSmoothScroll(!reduce)
+
   // lock scroll during boot
   useEffect(() => {
     document.body.style.overflow = booted ? '' : 'hidden'
+    setScrollLocked(!booted)
     return () => { document.body.style.overflow = '' }
   }, [booted])
 

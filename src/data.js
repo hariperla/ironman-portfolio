@@ -22,6 +22,15 @@ export const profile = {
     'ROOT-CAUSE HUNTER',
     'EV & AUTONOMY ENTHUSIAST',
   ],
+  // hero tumbler: "I am a ___" — spins through these
+  heroRoles: [
+    'Autonomy Engineer',
+    'Automation Builder',
+    'Photographer',
+    'Motion Designer',
+    'Movie Buff',
+    'Superhero Nerd',
+  ],
 }
 
 export const stats = [

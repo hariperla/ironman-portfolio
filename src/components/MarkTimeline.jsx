@@ -4,6 +4,7 @@ import { SectionHeader, Brackets } from './ui.jsx'
 import { marks } from '../data.js'
 import { supportsWebGL } from '../webgl.js'
 import { art } from '../art.js'
+import { scrollToTarget } from '../lib/smoothScroll.js'
 
 const ArcReactor3D = lazy(() => import('./ArcReactor3D.jsx'))
 
@@ -305,7 +306,7 @@ export default function MarkTimeline() {
     if (!el) return
     const top = el.getBoundingClientRect().top + window.scrollY
     const scrollable = el.offsetHeight - window.innerHeight
-    window.scrollTo({ top: top + (i / (N - 1)) * scrollable + 1, behavior: 'smooth' })
+    scrollToTarget(top + (i / (N - 1)) * scrollable + 1, { offset: 0 })
   }
 
   const btn =

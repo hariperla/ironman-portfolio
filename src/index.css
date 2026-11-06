@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
 :root {
   --bg: #E9D8AC;
@@ -25,6 +26,11 @@
 
 html {
   scroll-behavior: smooth;
+}
+html.lenis-on {
+  scroll-behavior: auto;
+}
+html {
   scroll-padding-top: 84px;
 }
 
@@ -161,3 +167,47 @@ body {
   .caret, .ping::before { animation: none; }
   .holo::after { display: none; }
 }
+
+/* ---- hero role tumbler: 3D drum of pills ---- */
+.tumbler {
+  display: inline-grid;
+  perspective: 900px;
+  perspective-origin: 50% 50%;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  /* soft fade at the drum's top and bottom edges */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
+  overflow: visible;
+}
+.tumbler-drum {
+  display: inline-grid;
+  height: 100%;
+  position: relative;
+}
+.tumbler-face {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 0.55em;
+  white-space: nowrap;
+  border-radius: 0.28em;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  color: var(--red);
+  background: linear-gradient(180deg, #FFF8E6 0%, #F3E2B6 55%, #E2C88A 100%);
+  border: 1px solid rgba(107,74,26,0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.85),
+    inset 0 -3px 0 rgba(107,74,26,0.18),
+    0 0.12em 0 rgba(107,74,26,0.35),
+    0 0.35em 0.7em -0.2em rgba(43,27,12,0.35);
+  transition: color 0.4s ease;
+}
+.tumbler-face[data-active="false"] { color: var(--text-3); }
+.tumbler:focus-visible { outline: 2px solid var(--arc); outline-offset: 6px; border-radius: 0.3em; }
