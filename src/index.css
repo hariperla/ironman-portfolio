@@ -194,7 +194,7 @@ body {
   align-items: center;
   justify-content: center;
   height: 100%;
-  padding: 0 0.55em;
+  padding: 0 0.4em;
   white-space: nowrap;
   border-radius: 0.28em;
   backface-visibility: hidden;
@@ -211,3 +211,25 @@ body {
 }
 .tumbler-face[data-active="false"] { color: var(--text-3); }
 .tumbler:focus-visible { outline: 2px solid var(--arc); outline-offset: 6px; border-radius: 0.3em; }
+
+/* ---- hero mask reveal (Higgsfield video) ---- */
+.mask-reveal-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  /* feather the video's own golden backdrop into the page */
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 58%, transparent 71%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 58%, transparent 71%);
+  cursor: pointer;
+  user-select: none;
+}
+.mask-reveal::before {
+  content: "";
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 0 0 10px rgba(107,74,26,0.05), 0 30px 60px -30px rgba(43,27,12,0.5);
+  pointer-events: none;
+}

@@ -13,9 +13,6 @@ const FACE_H = 1.32                                   // em
 const RADIUS = FACE_H / 2 / Math.tan(Math.PI / N)     // em: drum radius so faces meet edge to edge
 const SPIN_MS = 2300
 
-// chest-reactor position in public/art/hero.jpg (percent of art box)
-const CHEST_X = 51
-const CHEST_Y = 85
 
 /* Words rise out of a mask, one after another */
 function RiseWords({ text, delay = 0, className, style }) {
@@ -101,7 +98,69 @@ function RoleTumbler({ reduce }) {
   )
 }
 
-export default function Hero() {
+/* The Higgsfield-animated reveal: helmet eyes flash, faceplate splits apart,
+   Hari grins out. Plays once when the boot overlay clears; hover or tap to
+   suit up again. Reduced motion shows the final face as a still. */
+function MaskReveal({ play, reduce }) {
+  const vid = useRef(null)
+  const [ended, setEnded] = useState(false)
+
+  useEffect(() => {
+    const v = vid.current
+    if (!v || reduce || !play) return
+    const t = setTimeout(() => { v.currentTime = 0; v.play().catch(() => setEnded(true)) }, 650)
+    return () => clearTimeout(t)
+  }, [play, reduce])
+
+  const replay = () => {
+    const v = vid.current
+    if (!v || reduce || !ended) return
+    setEnded(false)
+    v.currentTime = 0
+    v.play().catch(() => setEnded(true))
+  }
+
+  const size = 'clamp(220px, min(62vw, 56vh), 580px)'
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.92, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 1.1, delay: 0.3, ease: EASE }}
+      className="relative mask-reveal"
+      style={{ width: size, height: size }}
+      onMouseEnter={replay}
+      onClick={replay}
+    >
+      {reduce ? (
+        <img src={art.maskRevealEnd} alt="Illustrated portrait of Hari" className="mask-reveal-media" />
+      ) : (
+        <video
+          ref={vid}
+          className="mask-reveal-media"
+          src={art.maskReveal}
+          poster={art.maskRevealStart}
+          muted
+          playsInline
+          preload="auto"
+          onEnded={() => setEnded(true)}
+          aria-label="Animated helmet opening to reveal an illustrated portrait of Hari"
+        />
+      )}
+      {!reduce && (
+        <motion.span
+          className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap"
+          style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.28em', color: 'var(--text-3)' }}
+          animate={{ opacity: ended ? 1 : 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          HOVER TO SUIT UP AGAIN
+        </motion.span>
+      )}
+    </motion.div>
+  )
+}
+
+export default function Hero({ booted = true }) {
   const runway = useRef(null)
   const stage = useRef(null)
   const reduce = useReducedMotion()
@@ -117,9 +176,8 @@ export default function Hero() {
     my.set((e.clientY / window.innerHeight - 0.5) * 22)
   }
 
-  /* Scroll-scrubbed exit: the copy lifts away and the camera pushes into the
-     suit's chest reactor until its light floods the screen, then the next
-     section scrolls up out of the glow. Driven by GSAP ScrollTrigger. */
+  /* Scroll-scrubbed exit: copy blurs away, the helmet portrait tilts back and
+     recedes, then the next section rises. Driven by GSAP ScrollTrigger. */
   useLayoutEffect(() => {
     if (reduce) return
     const ctx = gsap.context(() => {
@@ -127,82 +185,23 @@ export default function Hero() {
         defaults: { ease: 'none' },
         scrollTrigger: { trigger: runway.current, start: 'top top', end: 'bottom bottom', scrub: 0.6, invalidateOnRefresh: true },
       })
-      // where the chest reactor sits now, so the push-in can steer it to screen center
-      const art = stage.current.querySelector('[data-hero="art"]')
-      const toCenter = (axis) => () => {
-        const r = art.getBoundingClientRect()
-        return axis === 'x'
-          ? window.innerWidth / 2 - (r.left + r.width * CHEST_X / 100)
-          : window.innerHeight / 2 - (r.top + r.height * CHEST_Y / 100)
-      }
-      tl.to('[data-hero="copy"]', { yPercent: -14, opacity: 0, filter: 'blur(8px)', duration: 0.32 }, 0)
-        .to('[data-hero="cue"]', { opacity: 0, duration: 0.08 }, 0)
-        .to(art, { x: toCenter('x'), y: toCenter('y'), duration: 0.5, ease: 'power2.inOut' }, 0.05)
-        .to(art, { scale: 9, duration: 0.8, ease: 'power3.in' }, 0)
-        .to('[data-hero="glow"]', { opacity: 1, scale: 3.2, duration: 0.45, ease: 'power2.in' }, 0.35)
-        .to(art, { autoAlpha: 0, duration: 0.18 }, 0.82)
+      tl.to('[data-hero="copy"]', { yPercent: -16, opacity: 0, filter: 'blur(8px)', duration: 0.5 }, 0)
+        .to('[data-hero="cue"]', { opacity: 0, duration: 0.1 }, 0)
+        .to('[data-hero="art"]', { yPercent: -10, scale: 0.82, rotateY: -14, opacity: 0, duration: 0.8, ease: 'power2.in' }, 0.1)
     }, stage)
     return () => ctx.revert()
   }, [reduce])
 
   return (
-    <section id="top" ref={runway} className="relative" style={{ height: reduce ? 'auto' : '210vh' }}>
+    <section id="top" ref={runway} className="relative" style={{ height: reduce ? 'auto' : '170vh' }}>
       <div
         ref={stage}
         onMouseMove={onMouseMove}
         className="sticky top-0 h-screen min-h-[600px] flex items-center overflow-hidden px-6 md:px-10"
       >
-        {/* painted armor — the camera flies into its reactor on scroll */}
-        <div
-          data-hero="art"
-          className="absolute right-[-30%] md:right-[2%] top-1/2 -translate-y-1/2 pointer-events-none will-change-transform"
-          style={{ transformOrigin: `${CHEST_X}% ${CHEST_Y}%` }}
-        >
-          <motion.div style={{ x: smx, y: smy }}>
-            <div
-              className="relative opacity-35 md:opacity-100"
-              style={{ height: 'clamp(380px, 80vh, 860px)', aspectRatio: '3 / 4', maxWidth: '92vw' }}
-            >
-              <motion.img
-                src={art.hero}
-                alt=""
-                aria-hidden="true"
-                fetchPriority="high"
-                initial={{ opacity: 0, scale: 1.06 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1.3, delay: 0.3, ease: EASE }}
-                className="absolute inset-0 w-full h-full object-cover select-none"
-                style={{
-                  maskImage: 'radial-gradient(ellipse 62% 68% at 50% 52%, black 45%, transparent 100%)',
-                  WebkitMaskImage: 'radial-gradient(ellipse 62% 68% at 50% 52%, black 45%, transparent 100%)',
-                }}
-              />
-              {/* reactor breath, then the light that swallows the screen */}
-              <motion.div
-                className="absolute rounded-full"
-                style={{
-                  left: `${CHEST_X}%`, top: `${CHEST_Y}%`, width: '22%', aspectRatio: '1',
-                  x: '-50%', y: '-50%',
-                  background: 'radial-gradient(circle, rgba(94,214,255,0.5), rgba(94,214,255,0.12) 48%, transparent 72%)',
-                }}
-                animate={reduce ? {} : { opacity: [0.7, 1, 0.7], scale: [0.94, 1.05, 0.94] }}
-                transition={{ repeat: Infinity, duration: 2.6, ease: 'easeInOut' }}
-              />
-              <div
-                data-hero="glow"
-                className="absolute rounded-full opacity-0"
-                style={{
-                  left: `${CHEST_X}%`, top: `${CHEST_Y}%`, width: '24%', aspectRatio: '1',
-                  transform: 'translate(-50%, -50%)',
-                  background: 'radial-gradient(circle, #F4FDFF 0%, #9BEAFF 30%, rgba(34,184,196,0.55) 55%, transparent 72%)',
-                }}
-              />
-            </div>
-          </motion.div>
-        </div>
-
         {/* copy */}
-        <div data-hero="copy" className="relative z-10 max-w-6xl mx-auto w-full pt-20 will-change-transform">
+        <div className="relative z-10 max-w-6xl mx-auto w-full pt-20 md:pt-16 flex flex-col-reverse md:flex-row md:items-center gap-10">
+        <div data-hero="copy" className="flex-1 min-w-0 will-change-transform">
           <motion.div
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
@@ -222,8 +221,8 @@ export default function Hero() {
           </h1>
 
           <div
-            className="mt-3 md:mt-5 flex flex-wrap items-center gap-x-[0.35em] gap-y-2 font-bold"
-            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.35rem, 4.4vw, 3.3rem)' }}
+            className="mt-3 md:mt-5 flex flex-wrap md:flex-nowrap items-center gap-x-[0.35em] gap-y-2 font-bold"
+            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.25rem, 2.1vw, 2.2rem)' }}
           >
             <motion.span
               initial={{ opacity: 0, y: 14 }}
@@ -286,6 +285,13 @@ export default function Hero() {
               SEE MY STORY
             </a>
           </motion.div>
+        </div>
+
+        <div data-hero="art" className="shrink-0 self-center will-change-transform" style={{ transformPerspective: 1000 }}>
+          <motion.div style={{ x: smx, y: smy }}>
+            <MaskReveal play={booted} reduce={reduce} />
+          </motion.div>
+        </div>
         </div>
 
         {/* scroll cue */}

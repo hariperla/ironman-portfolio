@@ -43,7 +43,7 @@ export default function App() {
       <Nav />
 
       <main className="relative" style={{ zIndex: 1 }}>
-        <Hero />
+        <Hero booted={booted} />
         <PowerStats />
         <MarkTimeline />
         <Workshop />
